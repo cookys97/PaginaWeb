@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visiónica: asistencia con reconocimiento facial para Android</title>
+  <meta name="description" content="Visiónica es una app Android que registra la asistencia de los estudiantes con reconocimiento facial. Proyecto de la Carrera de Sistemas Informáticos del Instituto Tecnológico Ayacucho.">
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/png" href="img/favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    /* Activa las animaciones (salvo que el sistema pida reducir movimiento).
+       Para forzarlas: abre la página con ?animaciones al final del enlace. */
+    (function () {
+      var d = document.documentElement;
+      var force = /[?&]animaciones/.test(location.search);
+      if (force) d.classList.add("force-motion");
+      if (force || !matchMedia("(prefers-reduced-motion: reduce)").matches) d.classList.add("anim");
+      setTimeout(function () { if (!d.dataset.ready) d.classList.add("reveal-all"); }, 4000);
+    })();
+  </script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+  <!-- Iconos reutilizables -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-download" viewBox="0 0 24 24">
+      <path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M4.5 20h15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24">
+      <path d="M14.5 5 7.5 12l7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-next" viewBox="0 0 24 24">
+      <path d="m9.5 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </svg>
+
+  <a class="skip" href="#contenido">Saltar al contenido</a>
+
+  <!-- ============ ENCABEZADO ============ -->
+  <header class="site-header">
+    <div class="wrap site-header__bar">
+      <a class="brand" href="#inicio" aria-label="Visiónica, ir al inicio">
+        <img src="img/mascota.png" alt="" width="264" height="209">
+        <span>Visiónica</span>
+      </a>
+      <nav class="site-nav" aria-label="Principal">
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#incluye">Qué incluye</a>
+        <a href="#pantallas">Pantallas</a>
+        <a href="#privacidad">Privacidad</a>
+      </nav>
+      <a class="btn btn--primary btn--small" href="#descarga" data-download>
+        <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
+        Descargar
+      </a>
+    </div>
+  </header>
+
+  <main id="contenido">
+
+    <!-- ============ INICIO ============ -->
+    <section class="hero tone-light" id="inicio">
+      <div class="hero__floor" aria-hidden="true"></div>
+      <div class="wrap hero__grid">
+        <div class="hero__text">
+          <h1><span class="hero__brand">Visiónica</span>
+          <span class="hero__claim">La lista de asistencia ahora se pasa con la cámara</span></h1>
+          <p class="lead">
+            Visiónica reconoce el rostro de cada estudiante y registra su asistencia desde el celular,
+            sin papel ni planillas. Es una app Android creada para la Carrera de Sistemas Informáticos
+            del Instituto Tecnológico Ayacucho.
+          </p>
+          <div class="hero__cta">
+            <a class="btn btn--primary" href="#descarga" data-download>
+              <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
+              Descargar para Android
+            </a>
+            <a class="btn btn--ghost" href="#como-funciona">Ver cómo funciona</a>
+          </div>
+          <ul class="chips" aria-label="Datos de la app">
+            <li>Versión 1.0</li>
+            <li>Android 8.0 o superior</li>
+            <li>Cámara e internet</li>
+          </ul>
+        </div>
+
+        <div class="hero__stage" id="hero-stage">
+          <canvas class="hero__canvas" id="face-canvas" aria-hidden="true"></canvas>
+          <p class="hud" aria-hidden="true"><b id="hud-state">No se detecta rostro</b><span>Ilustración del escaneo</span></p>
+          <div class="phone phone--main rise rise--1">
+            <img src="img/camara.jpg" width="517" height="853" alt="Cámara de Visiónica con un óvalo para centrar el rostro del estudiante">
+          </div>
+          <div class="hero__mascot rise rise--4">
+            <i class="lock" aria-hidden="true"></i>
+            <img src="img/mascota.png" width="264" height="209" alt="Mascota de Visiónica, un pajarito con un libro y una credencial">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MASCOTA ============ -->
+    <section class="section s-100 mascot" id="mascota">
+      <div class="wrap mascot__grid">
+        <div class="mascot__text">
+          <h2>Conoce a la mascota de Visiónica</h2>
+          <p class="section-lead">Un pajarito con un libro y una credencial. Lleva en la cabeza las esquinas de enfoque que usa la cámara para encontrar un rostro.</p>
+        </div>
+        <div class="mascot__stage">
+          <video id="mascot-video" src="video/mascota.mp4" poster="video/mascota.jpg" muted loop playsinline autoplay preload="metadata" aria-label="Animación de la mascota de Visiónica saludando con una pluma al aire"></video>
+          <button class="sound" id="sound" type="button" aria-pressed="false">Activar sonido</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CÓMO FUNCIONA ============ -->
+    <section class="section tone-light s-100" id="como-funciona">
+      <div class="wrap how">
+        <div class="how__intro">
+          <h2>Del ingreso a la lista, en cuatro pasos</h2>
+          <p class="section-lead">Toca cada paso para ver la pantalla de la app.</p>
+        </div>
+
+        <ol class="steps" id="steps">
+          <li>
+            <button class="step is-active" type="button" aria-current="true"
+                    data-img="img/acceso.jpg" data-alt="Pantalla de acceso con los botones Continuar con Google, Registrarse e Iniciar Sesión">
+              <span class="step__num">1</span>
+              <span class="step__body">
+                <span class="step__title">Entra con Google o con tu correo</span>
+                <span class="step__text">Crea tu cuenta con correo y contraseña, o entra con un toque usando Google. No hay un rol fijo: la misma cuenta sirve para dar clase y para ser estudiante.</span>
+              </span>
+            </button>
+          </li>
+          <li>
+            <button class="step" type="button"
+                    data-img="img/unirse-crear.jpg" data-alt="Ventana para elegir entre Unirse a clase y Crear clase">
+              <span class="step__num">2</span>
+              <span class="step__body">
+                <span class="step__title">Crea una clase o únete con un código</span>
+                <span class="step__text">Quien crea la clase actúa como docente. Quienes se unen con el código de 7 caracteres actúan como estudiantes.</span>
+              </span>
+            </button>
+          </li>
+          <li>
+            <button class="step" type="button"
+                    data-img="img/camara.jpg" data-alt="Cámara para tomar asistencia con un óvalo para centrar el rostro">
+              <span class="step__num">3</span>
+              <span class="step__body">
+                <span class="step__title">Registra tu rostro y toma asistencia</span>
+                <span class="step__text">Cada estudiante registra su rostro con la cámara. Después, el docente enfoca a cada estudiante por turnos y la app lo identifica.</span>
+              </span>
+            </button>
+          </li>
+          <li>
+            <button class="step" type="button"
+                    data-img="img/detalle-clase.jpg" data-alt="Detalle de la clase con el código, la lista de estudiantes y la asistencia">
+              <span class="step__num">4</span>
+              <span class="step__body">
+                <span class="step__title">Confirma el estado y revisa el historial</span>
+                <span class="step__text">El docente confirma Presente o Atraso; Falta y Permiso se registran a mano. Cada estudiante consulta su asistencia con fecha y hora dentro de la clase.</span>
+              </span>
+            </button>
+          </li>
+        </ol>
+
+        <div class="how__stage">
+          <div class="phone phone--stage">
+            <img id="step-img" src="img/acceso.jpg" width="451" height="753" alt="Pantalla de acceso con los botones Continuar con Google, Registrarse e Iniciar Sesión">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ QUÉ INCLUYE ============ -->
+    <section class="section tone-light s-200" id="incluye">
+      <div class="wrap">
+        <h2>Todo lo que una clase necesita para pasar lista</h2>
+
+        <div class="bento">
+          <article class="tile tile--scan">
+            <div class="tile__text">
+              <h3>Reconocimiento facial con FaceNet</h3>
+              <p>Un modelo FaceNet en formato TensorFlow Lite compara el rostro de cada estudiante con su registro. Cuando lo identifica, el docente confirma el resultado.</p>
+            </div>
+            <div class="scan" aria-hidden="true">
+              <span class="scan__oval"></span>
+              <span class="scan__label">Centra tu rostro en el óvalo</span>
+            </div>
+          </article>
+
+          <article class="tile tile--states">
+            <h3>Cuatro estados de asistencia</h3>
+            <ul class="pills" aria-label="Estados de asistencia">
+              <li class="pill pill--1">Presente</li>
+              <li class="pill pill--2">Atraso</li>
+              <li class="pill pill--3">Falta</li>
+              <li class="pill pill--4">Permiso</li>
+            </ul>
+            <p>Presente y Atraso se confirman al identificar al estudiante. Falta y Permiso se registran manualmente.</p>
+          </article>
+
+          <article class="tile tile--code">
+            <h3>Código de 7 caracteres</h3>
+            <p>Cada clase tiene un código aleatorio. Los estudiantes lo usan para unirse.</p>
+            <span class="code" aria-label="Ejemplo de código de clase">aPRZHVO</span>
+          </article>
+
+          <article class="tile tile--excel">
+            <h3>Exporta a Excel</h3>
+            <p>Descarga la asistencia de cada clase eligiendo el mes y el año.</p>
+            <span class="mini-chips" aria-hidden="true"><span>Octubre</span><span>2026</span></span>
+          </article>
+
+          <article class="tile tile--calendar">
+            <h3>Calendario y notificaciones</h3>
+            <p>Organiza tus clases en el calendario, revisa los avisos de tus eventos y archiva las clases que ya terminaron.</p>
+          </article>
+
+          <article class="tile tile--history">
+            <h3>Historial para cada estudiante</h3>
+            <p>Cada persona ve su estado de asistencia con fecha y hora, solo de sus propias clases.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PANTALLAS ============ -->
+    <section class="section tone-light s-300" id="pantallas">
+      <div class="wrap">
+        <div class="gallery__head">
+          <h2>Así se ve por dentro</h2>
+          <div class="gallery__nav">
+            <button class="round" type="button" id="gal-prev" aria-label="Ver pantallas anteriores">
+              <svg class="icon" aria-hidden="true"><use href="#i-prev"/></svg>
+            </button>
+            <button class="round" type="button" id="gal-next" aria-label="Ver más pantallas">
+              <svg class="icon" aria-hidden="true"><use href="#i-next"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="gallery" id="gallery" tabindex="0" aria-label="Capturas de la app, desplázate hacia los lados">
+        <figure><div class="phone"><img src="img/bienvenida.jpg" width="438" height="735" alt="Pantalla de bienvenida con la mascota y la versión 1.0" loading="lazy"></div><figcaption>Bienvenida</figcaption></figure>
+        <figure><div class="phone"><img src="img/acceso.jpg" width="451" height="753" alt="Pantalla de acceso" loading="lazy"></div><figcaption>Acceso</figcaption></figure>
+        <figure><div class="phone"><img src="img/crear-cuenta.jpg" width="532" height="884" alt="Pantalla Crear Cuenta con nombre, correo y contraseña" loading="lazy"></div><figcaption>Crear cuenta</figcaption></figure>
+        <figure><div class="phone"><img src="img/inicio-sesion.jpg" width="416" height="771" alt="Pantalla de inicio de sesión" loading="lazy"></div><figcaption>Inicio de sesión</figcaption></figure>
+        <figure><div class="phone"><img src="img/mis-clases.jpg" width="517" height="837" alt="Pantalla Mis Clases" loading="lazy"></div><figcaption>Mis Clases</figcaption></figure>
+        <figure><div class="phone"><img src="img/menu.jpg" width="470" height="825" alt="Menú lateral con calendario, notificaciones, clases archivadas y configuración" loading="lazy"></div><figcaption>Menú lateral</figcaption></figure>
+        <figure><div class="phone"><img src="img/unirse-crear.jpg" width="487" height="827" alt="Opciones para unirse a una clase o crear una" loading="lazy"></div><figcaption>Unirse o crear una clase</figcaption></figure>
+        <figure><div class="phone"><img src="img/detalle-clase.jpg" width="421" height="803" alt="Detalle de la clase" loading="lazy"></div><figcaption>Detalle de la clase</figcaption></figure>
+        <figure><div class="phone"><img src="img/camara.jpg" width="517" height="853" alt="Cámara para tomar asistencia" loading="lazy"></div><figcaption>Cámara para tomar asistencia</figcaption></figure>
+        <figure><div class="phone"><img src="img/configuracion.jpg" width="442" height="823" alt="Pantalla de configuración" loading="lazy"></div><figcaption>Configuración</figcaption></figure>
+        <figure><div class="phone"><img src="img/calendario.jpg" width="519" height="811" alt="Calendario con las clases y eventos del mes" loading="lazy"></div><figcaption>Calendario</figcaption></figure>
+        <figure><div class="phone"><img src="img/notificaciones.jpg" width="521" height="825" alt="Pantalla de notificaciones sin avisos" loading="lazy"></div><figcaption>Notificaciones</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- ============ PRIVACIDAD Y ESTADO ============ -->
+    <section class="section tone-dark s-600" id="privacidad">
+      <div class="wrap trust">
+        <div class="trust__col">
+          <h2>Guarda tu rostro como números, no como foto</h2>
+          <p>Al registrar tu rostro, Visiónica guarda una representación numérica (un embedding) en Firebase. Cuando el docente toma asistencia, la captura se usa para compararla y no se guarda como fotografía.</p>
+          <p>Las fotos de perfil y los banners de las clases sí se guardan, en Cloudinary. Para iniciar sesión y sincronizar los datos hace falta conexión a internet.</p>
+        </div>
+
+        <div class="trust__col trust__panel">
+          <h3>Primera prueba con estudiantes</h3>
+          <dl class="bars">
+            <div class="bar">
+              <dt>Participaron</dt>
+              <dd><span class="bar__fill" style="--w:100%"><b>8</b></span></dd>
+            </div>
+            <div class="bar">
+              <dt>Completaron el registro facial</dt>
+              <dd><span class="bar__fill" style="--w:87.5%"><b>7</b></span></dd>
+            </div>
+            <div class="bar">
+              <dt>Fueron reconocidos</dt>
+              <dd><span class="bar__fill" style="--w:62.5%"><b>5</b></span></dd>
+            </div>
+          </dl>
+          <p class="panel__note">Son resultados preliminares. Lo que sigue es optimizar la verificación de parpadeo, calibrar el umbral de reconocimiento y mejorar la instalación en dispositivos antiguos.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DESCARGA ============ -->
+    <section class="section tone-dark s-800" id="descarga">
+      <div class="wrap get">
+        <div class="get__main">
+          <h2>Descarga Visiónica para Android</h2>
+          <p class="section-lead">Instala el archivo APK en tu celular. Necesitas Android 8.0 o superior, cámara e internet.</p>
+          <a class="btn btn--light btn--big" href="#descarga" data-download id="link-descarga">
+            <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
+            Descargar APK versión 1.0
+          </a>
+          <p class="get__warn">En algunos dispositivos antiguos la instalación puede fallar. Si te pasa, avísanos con el modelo de tu celular.</p>
+        </div>
+
+        <ol class="install">
+          <li><span class="install__num">1</span><p>Toca el botón y espera a que termine la descarga del archivo.</p></li>
+          <li><span class="install__num">2</span><p>Abre el archivo. Si Android lo pide, permite instalar apps desde este origen.</p></li>
+          <li><span class="install__num">3</span><p>Abre Visiónica, entra con tu cuenta y dale permiso a la cámara.</p></li>
+        </ol>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ PIE ============ -->
+  <footer class="site-footer tone-dark">
+    <div class="wrap footer__grid">
+      <div class="footer__brand">
+        <img src="img/mascota.png" alt="" width="264" height="209">
+        <div>
+          <p class="footer__name">Visiónica</p>
+          <p class="footer__tag">Control de asistencia inteligente</p>
+        </div>
+      </div>
+
+      <dl class="credits">
+        <div><dt>Proyecto de grado</dt><dd>Para optar al título de Técnico Superior en Sistemas Informáticos</dd></div>
+        <div><dt>Postulante</dt><dd>Aracely Edith Alanoca Limachi</dd></div>
+        <div><dt>Tutor</dt><dd>Lic. Luis Rodrigo Gutiérrez Miranda</dd></div>
+        <div><dt>Institución</dt><dd>Instituto Tecnológico Ayacucho, La Paz, Bolivia, 2026</dd></div>
+      </dl>
+    </div>
+
+    <div class="tones" role="img" aria-label="Escala de tonos lila de Visiónica, de claro a oscuro">
+      <span style="background:#FAF6FF"></span>
+      <span style="background:#F3EAFD"></span>
+      <span style="background:#E6D5F9"></span>
+      <span style="background:#D2B6F2"></span>
+      <span style="background:#BA93E8"></span>
+      <span style="background:#A173DA"></span>
+      <span style="background:#8350BE"></span>
+      <span style="background:#6A3AA0"></span>
+      <span style="background:#4E2A7A"></span>
+      <span style="background:#341C57"></span>
+      <span style="background:#220F3B"></span>
+    </div>
+  </footer>
+
+</body>
+</html>

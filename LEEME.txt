@@ -1,0 +1,30 @@
+VISIÓNICA · PÁGINA WEB
+======================
+
+Archivos
+  index.html   la página
+  style.css    los colores y el diseño (fondo negro con acentos lila)
+  app.js       botones, pasos, galería y animaciones
+  img/         capturas de la app y la mascota
+
+Probar en tu computadora
+  1. Abre la carpeta en VS Code.
+  2. Instala la extensión "Live Server".
+  3. Clic derecho en index.html > Open with Live Server.
+
+Poner el enlace de descarga
+  1. Sube tu APK a GitHub: repositorio > Releases > Create a new release.
+  2. Copia el link del archivo .apk.
+  3. Abre app.js y pega ese link en DOWNLOAD_URL (primeras líneas).
+
+Publicar en Vercel
+  1. Sube TODA esta carpeta a un repositorio de GitHub.
+  2. En vercel.com: Add New > Project > Import > Deploy.
+  (No hay que cambiar ninguna configuración: es una página estática.)
+
+Animaciones
+  Si en tu Windows está desactivado "Efectos de animación"
+  (Configuración > Accesibilidad > Efectos visuales), la página
+  respeta eso y se ve sin movimiento. Para verla animada igual,
+  agrega ?animaciones al final del enlace. Ejemplo:
+    http://127.0.0.1:5500/index.html?animaciones
